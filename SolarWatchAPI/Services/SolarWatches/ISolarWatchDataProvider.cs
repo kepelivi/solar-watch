@@ -4,5 +4,5 @@ namespace SolarWatchAPI.Services.SolarWatches;
 
 public interface ISolarWatchDataProvider
 {
-    string GetCurrentSolarWatch(GeoCode geoCode, DateTime date);
+    string GetCurrentSolarWatch(GeoCode geoCode, string date);
 }

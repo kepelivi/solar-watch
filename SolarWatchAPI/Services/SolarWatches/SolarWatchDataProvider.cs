@@ -13,9 +13,9 @@ public class SolarWatchDataProvider : ISolarWatchDataProvider
         _logger = logger;
     }
 
-    public string GetCurrentSolarWatch(GeoCode geoCode, DateTime date)
+    public string GetCurrentSolarWatch(GeoCode geoCode, string date)
     {
-        var url = $"https://api.sunrise-sunset.org/json?lat={geoCode.Latitude}&lng={geoCode.Longitude}&date={date.ToShortDateString()}";
+        var url = $"https://api.sunrise-sunset.org/json?lat={geoCode.Latitude}&lng={geoCode.Longitude}&date={date}";
         var client = new WebClient();
         
         _logger.LogInfo($"Calling GeoCode API with url: {url}");
