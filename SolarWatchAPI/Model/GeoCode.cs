@@ -1,8 +1,3 @@
 ﻿namespace SolarWatchAPI.Model;
 
-public class GeoCode
-{
-    public decimal Longitude;
-
-    public decimal Latitude;
-}
+public record GeoCode(decimal Longitude, decimal Latitude);
