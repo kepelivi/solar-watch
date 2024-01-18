@@ -12,7 +12,7 @@ public class JsonProcess : IJsonProcess
         JsonElement lat = json.RootElement.GetProperty("lat");
         JsonElement lon = json.RootElement.GetProperty("lon");
         
-        GeoCode geoCode = new GeoCode(lat.GetDecimal(), lon.GetDecimal());
+        GeoCode geoCode = new GeoCode(lon.GetDecimal(), lat.GetDecimal());
 
         return geoCode;
     }
