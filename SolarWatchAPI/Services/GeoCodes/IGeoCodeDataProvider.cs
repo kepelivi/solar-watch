@@ -2,7 +2,7 @@
 
 namespace SolarWatchAPI.Controllers;
 
-public interface IGeoCodeProvider
+public interface IGeoCodeDataProvider
 {
     string GetGeoCodeString(string city);
 }

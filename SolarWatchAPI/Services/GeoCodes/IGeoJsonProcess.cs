@@ -2,7 +2,7 @@
 
 namespace SolarWatchAPI.Controllers;
 
-public interface IJsonProcess
+public interface IGeoJsonProcess
 {
     GeoCode Process(string data);
 }

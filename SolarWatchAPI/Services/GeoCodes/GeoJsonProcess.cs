@@ -4,13 +4,13 @@ using SolarWatchAPI.Model;
 
 namespace SolarWatchAPI.Controllers;
 
-public class JsonProcess : IJsonProcess
+public class GeoJsonProcess : IGeoJsonProcess
 {
     public GeoCode Process(string data)
     {
         JsonDocument json = JsonDocument.Parse(data);
-        JsonElement lat = json.RootElement.GetProperty("lat");
-        JsonElement lon = json.RootElement.GetProperty("lon");
+        JsonElement lat = json.RootElement.EnumerateArray().FirstOrDefault().GetProperty("lat");
+        JsonElement lon = json.RootElement.EnumerateArray().FirstOrDefault().GetProperty("lon");
         
         GeoCode geoCode = new GeoCode(lon.GetDecimal(), lat.GetDecimal());
 
