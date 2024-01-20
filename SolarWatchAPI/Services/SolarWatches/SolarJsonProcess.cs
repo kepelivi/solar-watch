@@ -12,7 +12,7 @@ public class SolarJsonProcess : ISolarJsonProcess
         JsonElement sunrise = results.GetProperty("sunrise");
         JsonElement sunset = results.GetProperty("sunset");
 
-        SolarWatch solarWatch = new SolarWatch(sunrise.GetString(), sunset.GetString());
+        SolarWatch solarWatch = new(sunrise.GetString(), sunset.GetString());
 
         return solarWatch;
     }
