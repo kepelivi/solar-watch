@@ -4,5 +4,5 @@ namespace SolarWatchAPI.Controllers;
 
 public interface IGeoCodeDataProvider
 {
-    string GetGeoCodeString(string city);
+    Task<string> GetGeoCodeString(string city);
 }

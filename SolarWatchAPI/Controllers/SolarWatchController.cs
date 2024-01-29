@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using SolarWatchAPI.Model;
 using SolarWatchAPI.Services.SolarWatches;
 using ILogger = SolarWatchAPI.Utilities.ILogger;
 
@@ -31,14 +32,14 @@ public class SolarWatchController : ControllerBase
     }
 
     [HttpGet("GetSolarWatch")]
-    public IActionResult GetSolarWatch([Required] string city, [Required] string date)
+    public async Task<ActionResult<SolarWatch>> GetSolarWatch([Required] string city, [Required] string date)
     {
         try
         {
-            var geoCodeString = _geoCodeDataProvider.GetGeoCodeString(city);
+            var geoCodeString = await _geoCodeDataProvider.GetGeoCodeString(city);
             var geoCode = _geoJsonProcess.Process(geoCodeString);
 
-            var solarString = _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
+            var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
             
             return Ok(_solarJsonProcess.Process(solarString));
         }

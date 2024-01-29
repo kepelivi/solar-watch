@@ -13,13 +13,14 @@ public class SolarWatchDataProvider : ISolarWatchDataProvider
         _logger = logger;
     }
 
-    public string GetCurrentSolarWatch(GeoCode geoCode, string date)
+    public async Task<string> GetCurrentSolarWatch(GeoCode geoCode, string date)
     {
         var url = $"https://api.sunrise-sunset.org/json?lat={geoCode.Latitude}&lng={geoCode.Longitude}&date={date}";
-        var client = new WebClient();
+        using var client = new HttpClient();
         
         _logger.LogInfo($"Calling GeoCode API with url: {url}");
 
-        return client.DownloadString(url);
+        var response = await client.GetAsync(url);
+        return await response.Content.ReadAsStringAsync();
     }
 }
