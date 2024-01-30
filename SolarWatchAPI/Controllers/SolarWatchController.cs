@@ -40,8 +40,10 @@ public class SolarWatchController : ControllerBase
             var geoCode = _geoJsonProcess.Process(geoCodeString);
 
             var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
+
+            var solarWatch = _solarJsonProcess.Process(solarString);
             
-            return Ok(_solarJsonProcess.Process(solarString));
+            return Ok(solarWatch);
         }
         catch (Exception e)
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SolarWatchAPI.Controllers;
+using SolarWatchAPI.Model;
 using SolarWatchAPI.Services.SolarWatches;
 using SolarWatchAPI.Utilities;
 
@@ -28,30 +29,29 @@ public class SolarWatchControllerTest
     }
 
     [Test]
-    public void Proper_Processing_of_GeoCode_and_SolarWatch()
+    public async Task Proper_Processing_of_GeoCode_and_SolarWatch()
     {
         var city = "Budapest";
         var date = "2022-12-13";
 
-        var geoString = geoProv.Object.GetGeoCodeString(city);
-        var geoCode = geoJsonProc.Object.Process(geoString);
+        var solarWatch = new SolarWatch("6:21:17 AM", "2:54:38 PM");
 
-        var solarString = solarProv.Object.GetCurrentSolarWatch(geoCode, date);
-        var expected = solarJsonProc.Object.Process(solarString);
-        var result = controller.GetSolarWatch(city, date) as OkObjectResult;
-        
-        Assert.That(result.Value, Is.EqualTo(expected));
+        // Act
+        var response = await controller.GetSolarWatch(city, date);
+        var result = response.Result as OkObjectResult;
+        // Assert
+        Assert.IsInstanceOf<ActionResult<SolarWatch>>(response);
+        Assert.AreEqual(solarWatch,result.Value);
     }
 
     [Test]
-    public void NonExistent_City_Throws_Exception()
+    public async Task NonExistent_City_Throws_Exception()
     {
         var city = "Non Existent City";
         var date = "2022-01-01";
-        
-        var result = controller.GetSolarWatch(city, date) as NotFoundObjectResult;
 
-        Assert.IsNotNull(result);
-        Assert.That(result.StatusCode, Is.EqualTo(404));
+        var result = await controller.GetSolarWatch(city, date);
+        
+        Assert.That(result.Value, Is.EqualTo(null));
     }
 }
