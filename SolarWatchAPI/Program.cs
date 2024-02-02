@@ -1,4 +1,5 @@
 using SolarWatchAPI.Controllers;
+using SolarWatchAPI.Data;
 using SolarWatchAPI.Services.SolarWatches;
 using SolarWatchAPI.Utilities;
 using ILogger = SolarWatchAPI.Utilities.ILogger;

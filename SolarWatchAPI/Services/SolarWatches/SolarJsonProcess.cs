@@ -9,10 +9,10 @@ public class SolarJsonProcess : ISolarJsonProcess
     {
         JsonDocument json = JsonDocument.Parse(data);
         JsonElement results = json.RootElement.GetProperty("results");
-        JsonElement sunrise = results.GetProperty("sunrise");
-        JsonElement sunset = results.GetProperty("sunset");
+        var sunrise = results.GetProperty("sunrise").GetString();
+        var sunset = results.GetProperty("sunset").GetString();
 
-        SolarWatch solarWatch = new(sunrise.GetString(), sunset.GetString());
+        SolarWatch solarWatch = new(sunrise, sunset);
 
         return solarWatch;
     }
