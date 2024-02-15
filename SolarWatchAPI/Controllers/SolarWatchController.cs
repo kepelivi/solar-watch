@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatchAPI.Data;
 using SolarWatchAPI.Model;
@@ -32,7 +33,7 @@ public class SolarWatchController : ControllerBase
         _solarJsonProcess = solarJsonProc;
     }
 
-    [HttpGet("GetSolarWatch")]
+    [HttpGet("GetSolarWatch"), Authorize]
     public async Task<ActionResult<SolarWatch>> GetSolarWatch([Required] string cityName, [Required] string date)
     {
         await using var dbContext = new SolarWatchContext();
