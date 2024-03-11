@@ -1,18 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SolarWatchAPI.Model;
 
 namespace SolarWatchAPI.Data;
 
-public class SolarWatchContext : DbContext
+public class SolarWatchContext : IdentityDbContext<IdentityUser, IdentityRole, string>
 {
     public DbSet<City> Cities { get; set; }
     
     public DbSet<Solar> Solars { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public SolarWatchContext (DbContextOptions<SolarWatchContext> options)
+        : base(options)
     {
-        optionsBuilder.UseSqlServer(
-            "Server=localhost,1433;Database=SolarWatch;User Id=sa;Password=CluelessRick2002!;Encrypt=false;");
+    }
+
+    public SolarWatchContext()
+    {
+        
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
