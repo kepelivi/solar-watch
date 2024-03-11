@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SolarWatchAPI.Controllers;
@@ -58,6 +59,7 @@ builder.Services.AddSingleton<ISolarJsonProcess, SolarJsonProcess>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<AuthenticationSeeder>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -78,7 +80,10 @@ builder.Services
         };
     });
 
-builder.Services.AddDbContext<UsersContext>();
+builder.Services.AddDbContext<SolarWatchContext>((container, options) =>
+{
+    options.UseSqlServer("Server=localhost,1433;Database=SolarWatch;User Id=sa;Password=CluelessAick2002!;TrustServerCertificate=true;");
+});
 
 // builder.Services
 //     .AddIdentityCore<IdentityUser>(options =>
@@ -96,7 +101,18 @@ builder.Services.AddDbContext<UsersContext>();
 
 AddIdentity();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "MyAllowSpecificOrigins",
+        policy  =>
+        {
+            policy.WithOrigins("*").AllowAnyHeader();
+        });
+});
+
 var app = builder.Build();
+
+app.UseCors("MyAllowSpecificOrigins");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -113,10 +129,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using var scope = app.Services.CreateScope();
+var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
 
-AddRoles();
+authenticationSeeder.AddRoles();
 
-AddAdmin();
+authenticationSeeder.AddAdmin();
 
 app.Run();
 
@@ -134,50 +152,6 @@ void AddIdentity()
             options.Password.RequireLowercase = true;
         })
         .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<UsersContext>();
+        .AddEntityFrameworkStores<SolarWatchContext>();
 }
 
-void AddRoles()
-{
-    using var scope = app.Services.CreateScope();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    var tAdmin = CreateAdminRole(roleManager);
-    tAdmin.Wait();
-
-    var tUser = CreateUserRole(roleManager);
-    tUser.Wait();
-}
-
-async Task CreateAdminRole(RoleManager<IdentityRole> roleManager)
-{
-    await roleManager.CreateAsync(new IdentityRole(config["AdminRole"]));
-}
-
-async Task CreateUserRole(RoleManager<IdentityRole> roleManager)
-{
-    await roleManager.CreateAsync(new IdentityRole(config["UserRole"]));
-}
-
-void AddAdmin()
-{
-    var tAdmin = CreateAdminIfNotExists();
-    tAdmin.Wait();
-}
-
-async Task CreateAdminIfNotExists()
-{
-    using var scope = app.Services.CreateScope();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var adminInDb = await userManager.FindByEmailAsync("admin@admin.com");
-    if (adminInDb == null)
-    {
-        var admin = new IdentityUser { UserName = "admin", Email = "admin@admin.com" };
-        var adminCreated = await userManager.CreateAsync(admin, config["AdminPassword"]);
-
-        if (adminCreated.Succeeded)
-        {
-            await userManager.AddToRoleAsync(admin, config["AdminRole"]);
-        }
-    }
-}
