@@ -3877,11 +3877,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kepel\\RiderProjects\\SolarWatchAPI\\SolarWatchAPI\\SolarWatchAPI.csproj",
+      "projectUniqueName": "C:\\Users\\kepel\\RiderProjects\\solar-watch\\SolarWatchAPI\\SolarWatchAPI.csproj",
       "projectName": "SolarWatchAPI",
-      "projectPath": "C:\\Users\\kepel\\RiderProjects\\SolarWatchAPI\\SolarWatchAPI\\SolarWatchAPI.csproj",
+      "projectPath": "C:\\Users\\kepel\\RiderProjects\\solar-watch\\SolarWatchAPI\\SolarWatchAPI.csproj",
       "packagesPath": "C:\\Users\\kepel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kepel\\RiderProjects\\SolarWatchAPI\\SolarWatchAPI\\obj\\",
+      "outputPath": "C:\\Users\\kepel\\RiderProjects\\solar-watch\\SolarWatchAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\kepel\\AppData\\Roaming\\NuGet\\NuGet.Config",

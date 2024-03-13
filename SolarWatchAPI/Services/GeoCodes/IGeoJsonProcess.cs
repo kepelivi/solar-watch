@@ -4,5 +4,5 @@ namespace SolarWatchAPI.Controllers;
 
 public interface IGeoJsonProcess
 {
-    GeoCode Process(string data);
+    City Process(string data);
 }

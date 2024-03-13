@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatchAPI.Data;
 using SolarWatchAPI.Model;
+using SolarWatchAPI.Services.Repositories;
 using SolarWatchAPI.Services.SolarWatches;
 using ILogger = SolarWatchAPI.Utilities.ILogger;
 
@@ -17,13 +18,17 @@ public class SolarWatchController : ControllerBase
     private readonly IGeoJsonProcess _geoJsonProcess;
     private readonly ISolarWatchDataProvider _solarWatchDataProvider;
     private readonly ISolarJsonProcess _solarJsonProcess;
+    private readonly ICityRepository _cityRepository;
+    private readonly ISolarRepository _solarRepository;
 
     public SolarWatchController(
         ILogger logger,
         IGeoCodeDataProvider geoProv,
         IGeoJsonProcess geoJsonProc,
         ISolarWatchDataProvider solarProv,
-        ISolarJsonProcess solarJsonProc
+        ISolarJsonProcess solarJsonProc,
+        ICityRepository cityRepository,
+        ISolarRepository solarRepository
     )
     {
         _logger = logger;
@@ -31,17 +36,18 @@ public class SolarWatchController : ControllerBase
         _geoJsonProcess = geoJsonProc;
         _solarWatchDataProvider = solarProv;
         _solarJsonProcess = solarJsonProc;
+        _cityRepository = cityRepository;
+        _solarRepository = solarRepository;
     }
 
     [HttpGet("GetSolarWatch"), Authorize(Roles="User, Admin")]
     public async Task<ActionResult<SolarWatch>> GetSolarWatch([Required] string cityName, [Required] string date)
     {
-        await using var dbContext = new SolarWatchContext();
-        var city = dbContext.Cities.FirstOrDefault(c => c.Name == cityName);
+        var city = _cityRepository.GetCity(cityName);
 
         if (city != null)
         {
-            var solar = dbContext.Solars.FirstOrDefault(s => s.CityId == city.Id);
+            var solar = _solarRepository.GetSolar(city.Id);
 
             if (solar != null)
             {
@@ -63,8 +69,7 @@ public class SolarWatchController : ControllerBase
                 var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
                 var solarWatch = _solarJsonProcess.Process(solarString);
 
-                dbContext.Add(new Solar(city.Id, solarWatch.Sunrise, solarWatch.Sunset));
-                await dbContext.SaveChangesAsync();
+                _solarRepository.AddSolar(new Solar(city.Id, solarWatch.Sunrise, solarWatch.Sunset));
 
                 _logger.LogInfo($"Found and retrieved city {city.Name} from database.");
                 _logger.LogInfo("Added new solar data.");
@@ -80,10 +85,14 @@ public class SolarWatchController : ControllerBase
         try
         {
             var geoCodeString = await _geoCodeDataProvider.GetGeoCodeString(cityName);
-            var geoCode = _geoJsonProcess.Process(geoCodeString);
+            var cityFromApi = _geoJsonProcess.Process(geoCodeString);
+
+            var geoCode = new GeoCode(cityFromApi.Longitude, cityFromApi.Latitude);
 
             var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
             var solarWatch = _solarJsonProcess.Process(solarString);
+            
+            _solarRepository.AddSolar(new Solar(cityFromApi.Id, solarWatch.Sunrise, solarWatch.Sunset));
 
             return Ok(solarWatch);
         }
@@ -99,9 +108,7 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            await using var dbContext = new SolarWatchContext();
-            dbContext.Solars.Update(solar);
-            dbContext.SaveChanges();
+            _solarRepository.UpdateSolar(solar);
             return Ok("Successfully updated sunrise and sunset time.");
         }
         catch (Exception e)
@@ -116,10 +123,7 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            await using var dbContext = new SolarWatchContext();
-            var solar = dbContext.Solars.Find(id);
-            dbContext.Solars.Remove(solar);
-            dbContext.SaveChanges();
+            _solarRepository.DeleteSolar(id);
             return Ok("Successfully deleted sunrise and sunset times.");
         }
         catch (Exception e)

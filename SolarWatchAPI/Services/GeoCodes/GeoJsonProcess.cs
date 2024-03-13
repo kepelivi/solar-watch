@@ -2,15 +2,20 @@
 using System.Text.Json.Serialization;
 using SolarWatchAPI.Data;
 using SolarWatchAPI.Model;
+using SolarWatchAPI.Services.Repositories;
 
 namespace SolarWatchAPI.Controllers;
 
 public class GeoJsonProcess : IGeoJsonProcess
 {
-    public GeoCode Process(string data)
+    private readonly ICityRepository _cityRepository;
+
+    public GeoJsonProcess(ICityRepository cityRepository)
     {
-        using var dbContext = new SolarWatchContext();
-        
+        _cityRepository = cityRepository;
+    }
+    public City Process(string data)
+    {
         JsonDocument json = JsonDocument.Parse(data);
         var lat = json.RootElement.EnumerateArray().FirstOrDefault().GetProperty("lat").GetDecimal();
         var lon = json.RootElement.EnumerateArray().FirstOrDefault().GetProperty("lon").GetDecimal();
@@ -18,17 +23,15 @@ public class GeoJsonProcess : IGeoJsonProcess
         var country = json.RootElement.EnumerateArray().FirstOrDefault().GetProperty("country").GetString();
         if (json.RootElement.EnumerateArray().FirstOrDefault().TryGetProperty("state", out var state))
         {
-            dbContext.Add(new City(name, lat, lon, state.GetString(), country));
+            var city = new City(name, lat, lon, state.GetString(), country);
+            _cityRepository.AddCity(city);
+            return city;
         }
         else
         {
-            dbContext.Add(new City(name, lat, lon, null, country));
+            var city = new City(name, lat, lon, null, country);
+            _cityRepository.AddCity(city);
+            return city;
         }
-
-        dbContext.SaveChanges();
-        
-        GeoCode geoCode = new(lon, lat);
-
-        return geoCode;
     }
 }
