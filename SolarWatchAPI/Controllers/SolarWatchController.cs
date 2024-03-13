@@ -47,7 +47,7 @@ public class SolarWatchController : ControllerBase
 
         if (city != null)
         {
-            var solar = _solarRepository.GetSolar(city.Id);
+            var solar = _solarRepository.GetSolar(date);
 
             if (solar != null)
             {
@@ -69,7 +69,7 @@ public class SolarWatchController : ControllerBase
                 var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
                 var solarWatch = _solarJsonProcess.Process(solarString);
 
-                _solarRepository.AddSolar(new Solar(city.Id, solarWatch.Sunrise, solarWatch.Sunset));
+                _solarRepository.AddSolar(new Solar(city.Id, date, solarWatch.Sunrise, solarWatch.Sunset));
 
                 _logger.LogInfo($"Found and retrieved city {city.Name} from database.");
                 _logger.LogInfo("Added new solar data.");
@@ -92,7 +92,7 @@ public class SolarWatchController : ControllerBase
             var solarString = await _solarWatchDataProvider.GetCurrentSolarWatch(geoCode, date);
             var solarWatch = _solarJsonProcess.Process(solarString);
             
-            _solarRepository.AddSolar(new Solar(cityFromApi.Id, solarWatch.Sunrise, solarWatch.Sunset));
+            _solarRepository.AddSolar(new Solar(cityFromApi.Id, date, solarWatch.Sunrise, solarWatch.Sunset));
 
             return Ok(solarWatch);
         }
