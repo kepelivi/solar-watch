@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using SolarWatchAPI.Controllers;
 using SolarWatchAPI.Data;
 using SolarWatchAPI.Services.Authentication;
+using SolarWatchAPI.Services.Repositories;
 using SolarWatchAPI.Services.SolarWatches;
 using SolarWatchAPI.Utilities;
 using ILogger = SolarWatchAPI.Utilities.ILogger;
@@ -52,14 +53,21 @@ builder.Services.AddSwaggerGen(option =>
 builder.Services.AddSingleton<ILogger, ConsoleLogger>();
 
 builder.Services.AddSingleton<IGeoCodeDataProvider, GeoCodeDataProvider>();
-builder.Services.AddSingleton<IGeoJsonProcess, GeoJsonProcess>();
+builder.Services.AddTransient<IGeoJsonProcess, GeoJsonProcess>();
 
 builder.Services.AddSingleton<ISolarWatchDataProvider, SolarWatchDataProvider>();
 builder.Services.AddSingleton<ISolarJsonProcess, SolarJsonProcess>();
 
+builder.Services.AddTransient<ICityRepository, CityRepository>();
+builder.Services.AddTransient<ISolarRepository, SolarRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthenticationSeeder>();
+builder.Services.AddDbContext<SolarWatchContext>((container, options) =>
+{
+    options.UseSqlServer(config["ConnectionString"]);
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -79,25 +87,6 @@ builder.Services
             ),
         };
     });
-
-builder.Services.AddDbContext<SolarWatchContext>((container, options) =>
-{
-    options.UseSqlServer("Server=localhost,1433;Database=SolarWatch;User Id=sa;Password=CluelessAick2002!;TrustServerCertificate=true;");
-});
-
-// builder.Services
-//     .AddIdentityCore<IdentityUser>(options =>
-//     {
-//         options.SignIn.RequireConfirmedAccount = false;
-//         options.User.RequireUniqueEmail = true;
-//         options.Password.RequireDigit = false;
-//         options.Password.RequiredLength = 8;
-//         options.Password.RequireNonAlphanumeric = false;
-//         options.Password.RequireUppercase = true;
-//         options.Password.RequireLowercase = true;
-//     })
-//     .AddRoles<IdentityRole>()
-//     .AddEntityFrameworkStores<UsersContext>();
 
 AddIdentity();
 
