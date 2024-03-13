@@ -28,12 +28,14 @@ public class AuthenticationSeeder
 
     async Task CreateAdminRole()
     {
-        await _roleManager.CreateAsync(new IdentityRole(_config["AdminRole"]));
+        await _roleManager.CreateAsync(new IdentityRole(_config["AdminRole"] != null
+            ? _config["AdminRole"]:Environment.GetEnvironmentVariable("ADMINROLE")));
     }
 
     async Task CreateUserRole()
     {
-        await _roleManager.CreateAsync(new IdentityRole(_config["UserRole"]));
+        await _roleManager.CreateAsync(new IdentityRole(_config["UserRole"] != null
+            ? _config["UserRole"]:Environment.GetEnvironmentVariable("USERROLE")));
     }
 
     public void AddAdmin()
@@ -48,11 +50,13 @@ public class AuthenticationSeeder
         if (adminInDb == null)
         {
             var admin = new IdentityUser { UserName = "admin", Email = "admin@admin.com" };
-            var adminCreated = await _userManager.CreateAsync(admin, _config["AdminPassword"]);
+            var adminCreated = await _userManager.CreateAsync(admin, _config["AdminPassword"] != null
+                ? _config["AdminPassword"]:Environment.GetEnvironmentVariable("ADMINPASSWORD"));
 
             if (adminCreated.Succeeded)
             {
-                await _userManager.AddToRoleAsync(admin, _config["AdminRole"]);
+                await _userManager.AddToRoleAsync(admin, _config["AdminRole"] != null
+                    ? _config["AdminRole"]:Environment.GetEnvironmentVariable("ADMINROLE"));
             }
         }
     }
