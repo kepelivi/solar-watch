@@ -18,9 +18,9 @@ public class SolarRepository : ISolarRepository
         _context = context;
     }
     
-    public Solar GetSolar(int cityId)
+    public Solar GetSolar(string date)
     {
-        return _context.Solars.FirstOrDefault(s => s.CityId == cityId);
+        return _context.Solars.FirstOrDefault(s => s.Date == date);
     }
 
     public void AddSolar(Solar solar)
