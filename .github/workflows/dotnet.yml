@@ -25,4 +25,12 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
+      env:
+        TESTCONNECTIONSTRING: ${{ secrets.TESTCONNECTIONSTRING }}
+        ADMINROLE: ${{ secrets.ADMINROLE }}
+        USERROLE: ${{ secrets.USERROLE }}
+        ADMINPASSWORD: ${{ secrets.ADMINPASSWORD }}
+        ISSUERSIGNINGKEY: ${{ secrets.ISSUERSIGNINGKEY }}
+        VALIDISSUER: ${{ secrets.VALIDISSUER }}
+        VALIDAUDIENCE: ${{ secrets.VALIDAUDIENCE }}
       run: dotnet test --no-build --verbosity normal
