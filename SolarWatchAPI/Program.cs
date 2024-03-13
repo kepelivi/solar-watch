@@ -80,11 +80,24 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = config["ValidateIssuer"],
-            ValidAudience = config["ValidAudience"],
+            ValidIssuer = config["ValidIssuer"] != null
+                ? config["ValidIssuer"]:Environment.GetEnvironmentVariable("VALIDISSUER"),
+            ValidAudience = config["ValidAudience"] != null
+                ? config["ValidAudience"]:Environment.GetEnvironmentVariable("VALIDAUDIENCE"),
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(config["IssuerSigningKey"])
+                Encoding.UTF8.GetBytes(config["IssuerSigningKey"] != null
+                    ? config["IssuerSigningKey"]:Environment.GetEnvironmentVariable("ISSUERSIGNINGKEY"))
             ),
+        };
+        options.Events = new JwtBearerEvents();
+        options.Events.OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.ContainsKey("User"))
+            {
+                context.Token = context.Request.Cookies["User"];
+            }
+            
+            return Task.CompletedTask;
         };
     });
 
@@ -95,7 +108,20 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "MyAllowSpecificOrigins",
         policy  =>
         {
-            policy.WithOrigins("*").AllowAnyHeader();
+            policy
+                //.WithOrigins("*") //doesn't work with credentials included
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .SetIsOriginAllowed(origin =>
+                {
+                    if (string.IsNullOrWhiteSpace(origin)) return false;
+                    // Only add this to allow testing with localhost, remove this line in production!
+                    if (origin.ToLower().StartsWith("http://localhost")) return true;
+                    // Insert your production domain here.
+                    if (origin.ToLower().StartsWith("https://dev.mydomain.com")) return true;
+                    return false;
+                });
         });
 });
 
@@ -144,3 +170,4 @@ void AddIdentity()
         .AddEntityFrameworkStores<SolarWatchContext>();
 }
 
+public partial class Program{}
